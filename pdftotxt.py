@@ -115,27 +115,47 @@ def browse_directory(title: str = "Select a Directory") -> Optional[str]:
     root.destroy()
     return directory_path
 
+def clean_path(path: str) -> str:
+    """Clean and normalize Windows path."""
+    if path:
+        path = path.strip("'\"")
+        return os.path.normpath(path)
+    return path
+
 def main():
     parser = argparse.ArgumentParser(
         description='Convert PDF files to TXT files',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
-    python pdftotxt.py -i "C:/input_pdfs" -o "C:/output_texts"
-    python pdftotxt.py --gui
-    python pdftotxt.py  # launches GUI mode by default
+    # Using named arguments:
+    PDFtoTXT.exe -i "C:\Input PDFs" -o "D:\Output"
+
+    # Using positional arguments (first=input, second=output):
+    PDFtoTXT.exe "C:\Input PDFs" "D:\Output"
+
+    # Using GUI mode:
+    PDFtoTXT.exe --gui
         '''
     )
+
+    # Add positional arguments
+    parser.add_argument(
+        'directories',
+        nargs='*',
+        help='Input and output directories (optional, will use GUI if not provided)',
+        metavar='DIR'
+    )
+
+    # Keep existing named arguments
     parser.add_argument(
         '--input', '-i',
         help='Input directory containing PDF files',
-        type=str,
         metavar='INPUT_DIR'
     )
     parser.add_argument(
         '--output', '-o',
         help='Output directory for TXT files',
-        type=str,
         metavar='OUTPUT_DIR'
     )
     parser.add_argument(
@@ -143,7 +163,21 @@ Examples:
         action='store_true',
         help='Use GUI mode for directory selection'
     )
+
     args = parser.parse_args()
+
+    # Handle positional arguments if provided
+    if len(args.directories) >= 2 and not (args.input or args.output):
+        args.input = clean_path(args.directories[0])
+        args.output = clean_path(args.directories[1])
+    elif len(args.directories) == 1 and not args.input:
+        args.input = clean_path(args.directories[0])
+
+    # Clean named arguments if provided
+    if args.input:
+        args.input = clean_path(args.input)
+    if args.output:
+        args.output = clean_path(args.output)
 
     # Handle directory selection
     if args.gui or (not args.input and not args.output):
@@ -156,9 +190,14 @@ Examples:
             return
     else:
         if not validate_directory(args.input):
-            parser.error("Invalid input directory")
+            logger.error("Invalid input directory")
+            return
+        if not args.output:
+            logger.error("Output directory not specified")
+            return
         if not validate_directory(args.output, is_input=False):
-            parser.error("Invalid output directory")
+            logger.error("Invalid output directory")
+            return
         input_directory = args.input
         output_directory = args.output
 
