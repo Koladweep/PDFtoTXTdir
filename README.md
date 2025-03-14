@@ -1,2 +1,2 @@
 # PDFtoTXTdir
-Convert all PDFs in a directory to another text directory while maintaining directory structure.
+Using PYPDF2 to Convert all PDFs in input directory while preserving the input directory tree structure in the output directory.
