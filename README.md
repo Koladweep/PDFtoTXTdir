@@ -4,9 +4,13 @@ Using PYPDF2 to Convert all PDFs in input directory while preserving the input d
 
 
 ### Usage
-
+If using executable:
 ```plaintext
 PDFtoTXT.exe [OPTIONS] [INPUT_DIRECTORY] [OUTPUT_DIRECTORY]
+```
+If using the script:
+```plaintext
+python3 pdf2txt.py [OPTIONS] [INPUT_DIRECTORY] [OUTPUT_DIRECTORY]
 ```
 
 ### Options
